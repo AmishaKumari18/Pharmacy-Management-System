@@ -45,7 +45,9 @@ public class PharmacistDashboard extends javax.swing.JFrame {
         jButton8 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setMinimumSize(new java.awt.Dimension(1300, 700));
         setUndecorated(true);
+        setPreferredSize(new java.awt.Dimension(1300, 700));
         setSize(new java.awt.Dimension(1300, 700));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
