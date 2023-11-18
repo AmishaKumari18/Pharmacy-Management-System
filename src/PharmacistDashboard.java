@@ -17,6 +17,7 @@ public class PharmacistDashboard extends javax.swing.JFrame {
      */
     public PharmacistDashboard() {
         initComponents();
+        setLocationRelativeTo(null);
     }
 
     public PharmacistDashboard(String tempUsername) {
@@ -166,6 +167,7 @@ public class PharmacistDashboard extends javax.swing.JFrame {
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         // TODO add your handling code here:
+        new UpdateMedicine().setVisible(true);
 
     }//GEN-LAST:event_jButton5ActionPerformed
 
