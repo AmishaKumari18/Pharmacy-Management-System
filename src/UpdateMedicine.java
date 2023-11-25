@@ -15,6 +15,7 @@ import java.util.*;
 public class UpdateMedicine extends javax.swing.JFrame {
     
     public String numberPattern = "^[0-9]*$";
+    public String username ="";
     /**
      * Creates new form UpdateMedicine
      */
@@ -23,6 +24,11 @@ public class UpdateMedicine extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }
 
+    public UpdateMedicine(String tempUsername) {
+        initComponents();
+        username = tempUsername;
+        setLocationRelativeTo(null);
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -171,12 +177,13 @@ public class UpdateMedicine extends javax.swing.JFrame {
         else{
             try{
                 Connection con = ConnectionProvider.getCon();
-                PreparedStatement ps = con.prepareStatement("update medicine set name=?, companyName=?, quantity=?, price=? where uniqueId=?;");
+                PreparedStatement ps = con.prepareStatement("update medicine set name=?, companyName=?, quantity=?, price=? where pharmacist_username =? and uniqueId=?;");
                 ps.setString(1, name);
                 ps.setString(2, companyName);
                 ps.setInt(3, totalQuantity);
                 ps.setString(4, price);
-                ps.setInt(5, Integer.parseInt(uniqueId));
+                ps.setString(5,username);
+                ps.setInt(6, Integer.parseInt(uniqueId));
                 
                 ps.executeUpdate();
                 JOptionPane.showMessageDialog(null,"Medicine Updated Successfully");
@@ -204,8 +211,13 @@ public class UpdateMedicine extends javax.swing.JFrame {
         else{
             try{
                 Connection con = ConnectionProvider.getCon();
-                Statement st = con.createStatement();
-                ResultSet rs = st.executeQuery("select *from medicine where uniqueId="+uniqueId+"");
+                String query = "SELECT * FROM medicine WHERE pharmacist_username = ? AND uniqueId = ?";
+                PreparedStatement st = con.prepareStatement(query);
+                st.setString(1, username);
+                st.setString(2, uniqueId);
+                ResultSet rs = st.executeQuery();
+
+                
                 while(rs.next()){
                     txtMedicineId.setEditable(false);
                     txtName.setText(rs.getString("name"));
