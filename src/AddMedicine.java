@@ -15,11 +15,18 @@ import java.util.*;
 public class AddMedicine extends javax.swing.JFrame {
     
     public String numberPattern = "^[0-9]*$";
+    public String username = "";
     /**
      * Creates new form AddMedicine
      */
     public AddMedicine() {
         initComponents();
+        setLocationRelativeTo(null);
+    }
+    
+    public AddMedicine(String tempUsername) {
+        initComponents();
+        username = tempUsername;
         setLocationRelativeTo(null);
     }
 
@@ -189,12 +196,13 @@ public class AddMedicine extends javax.swing.JFrame {
         else{
             try{
                 Connection con = ConnectionProvider.getCon();
-                PreparedStatement ps = con.prepareStatement("insert into medicine (uniqueId, name, companyName, quantity, price) values(?,?,?,?,?)");
-                ps.setString(1, uniqueId);
-                ps.setString(2, name);
-                ps.setString(3, companyName);
-                ps.setString(4, quantity);
-                ps.setString(5, price);
+                PreparedStatement ps = con.prepareStatement("insert into medicine (pharmacist_username,uniqueId, name, companyName, quantity, price) values(?,?,?,?,?,?)");
+                ps.setString(1, username);
+                ps.setString(2, uniqueId);
+                ps.setString(3, name);
+                ps.setString(4, companyName);
+                ps.setString(5, quantity);
+                ps.setString(6, price);
                 
                 ps.executeUpdate();
                 JOptionPane.showMessageDialog(null, "Medicine Added Successfully!");
