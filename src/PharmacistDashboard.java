@@ -141,7 +141,7 @@ public class PharmacistDashboard extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        new AddMedicine().setVisible(true);
+        new AddMedicine(username).setVisible(true);
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -152,7 +152,7 @@ public class PharmacistDashboard extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        new ViewMedicine().setVisible(true);
+        new ViewMedicine(username).setVisible(true);
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
@@ -167,7 +167,7 @@ public class PharmacistDashboard extends javax.swing.JFrame {
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         // TODO add your handling code here:
-        new UpdateMedicine().setVisible(true);
+        new UpdateMedicine(username).setVisible(true);
 
     }//GEN-LAST:event_jButton5ActionPerformed
 
