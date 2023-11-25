@@ -15,7 +15,7 @@ import javax.swing.table.*;
  */
 public class ViewMedicine extends javax.swing.JFrame {
     
-    
+    public String username = "";
     /**
      * Creates new form ViewMedicine
      */
@@ -24,6 +24,12 @@ public class ViewMedicine extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }
 
+    public ViewMedicine(String tempUsername) {
+        initComponents();
+        username = tempUsername;
+        setLocationRelativeTo(null);
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -68,7 +74,7 @@ public class ViewMedicine extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "Medicine ID", "Name", "Company Name", "Quantity", "Price"
+                "Medicine ID", "Name", "Company Name", "Quantity", "Price"
             }
         ));
         jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -97,10 +103,12 @@ public class ViewMedicine extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
         try{
             Connection con = ConnectionProvider.getCon();
-            Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery("Select * from Medicine;");
+            PreparedStatement st = con.prepareStatement("SELECT * FROM Medicine WHERE pharmacist_username = ?");
+            st.setString(1, username); // Setting the parameter
+            ResultSet rs = st.executeQuery();
+            
             while(rs.next()){
-                model.addRow(new Object[]{rs.getString("medicine_pk"),rs.getString("uniqueId"),rs.getString("name"),rs.getString("companyName"),rs.getString("quantity"),rs.getString("price")});
+                model.addRow(new Object[]{rs.getString("uniqueId"),rs.getString("name"),rs.getString("companyName"),rs.getString("quantity"),rs.getString("price")});
             }
         }
         catch(Exception e){
@@ -117,8 +125,9 @@ public class ViewMedicine extends javax.swing.JFrame {
         if(a == 0){
             try{
                 Connection con = ConnectionProvider.getCon();
-                PreparedStatement ps = con.prepareStatement("delete from medicine where medicine_pk = ?;");
+                PreparedStatement ps = con.prepareStatement("delete from medicine where medicine_pk = ? and pharmacist_username = ?;");
                 ps.setString(1,id);
+                ps.setString(2,username);
                 ps.executeUpdate();
                 JOptionPane.showMessageDialog(null,"Medicine Deleted Successfully.");
                 setVisible(false);
