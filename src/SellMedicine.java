@@ -8,6 +8,16 @@ import javax.swing.table.*;
 import dao.ConnectionProvider;
 import java.sql.*;
 
+import java.text.*;
+import java.util.Date;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.Paragraph;
+import common.OpenPdf;
+import java.io.*;
+import dao.PharmacyUtils;
+import java.util.Calendar;
+
 /**
  *
  * @author 91727
@@ -96,11 +106,11 @@ public class SellMedicine extends javax.swing.JFrame {
         txtNoofUnits = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtTotalPrice = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
+        btnAddToCart = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        cartTable = new javax.swing.JTable();
         jLabel9 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
+        lblFinalTotalPrice = new javax.swing.JLabel();
         jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -193,6 +203,11 @@ public class SellMedicine extends javax.swing.JFrame {
         getContentPane().add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(903, 189, -1, -1));
 
         txtNoofUnits.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        txtNoofUnits.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtNoofUnitsKeyReleased(evt);
+            }
+        });
         getContentPane().add(txtNoofUnits, new org.netbeans.lib.awtextra.AbsoluteConstraints(903, 217, 300, -1));
 
         jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -202,11 +217,21 @@ public class SellMedicine extends javax.swing.JFrame {
         txtTotalPrice.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         getContentPane().add(txtTotalPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(903, 285, 300, -1));
 
-        jButton2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButton2.setText("Add to Cart");
-        getContentPane().add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(1108, 334, -1, -1));
+        btnAddToCart.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnAddToCart.setText("Add to Cart");
+        btnAddToCart.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnAddToCartMouseClicked(evt);
+            }
+        });
+        btnAddToCart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddToCartActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnAddToCart, new org.netbeans.lib.awtextra.AbsoluteConstraints(1108, 334, -1, -1));
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        cartTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -214,7 +239,12 @@ public class SellMedicine extends javax.swing.JFrame {
                 "Medicine ID", "Name", "Company Name", "Price Per Unit", "No. of Units ", "Total Price"
             }
         ));
-        jScrollPane2.setViewportView(jTable2);
+        cartTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                cartTableMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(cartTable);
 
         getContentPane().add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(476, 390, 727, 200));
 
@@ -222,12 +252,17 @@ public class SellMedicine extends javax.swing.JFrame {
         jLabel9.setText("RS:");
         getContentPane().add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 610, -1, -1));
 
-        jLabel10.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        jLabel10.setText("0000");
-        getContentPane().add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 610, 90, -1));
+        lblFinalTotalPrice.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        lblFinalTotalPrice.setText("0000");
+        getContentPane().add(lblFinalTotalPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 610, 90, -1));
 
         jButton3.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButton3.setText("Purchase and Print");
+        jButton3.setText("Purchase and Save");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
         getContentPane().add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(1068, 608, -1, -1));
 
         pack();
@@ -278,7 +313,7 @@ public class SellMedicine extends javax.swing.JFrame {
             ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
-                txtUniqueId.setText("uniqueId");
+                txtUniqueId.setText(rs.getString("uniqueId"));
                 txtName.setText(rs.getString("name"));
                 txtCompanyName.setText(rs.getString("companyName"));
                 txtPricePerUnit.setText(rs.getString("price"));
@@ -290,6 +325,193 @@ public class SellMedicine extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, e);
         }
     }//GEN-LAST:event_medicineTableMouseClicked
+
+    private void txtNoofUnitsKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNoofUnitsKeyReleased
+        // TODO add your handling code here:
+        String noofUnits = txtNoofUnits.getText();
+        if(!noofUnits.equals("")){
+            String price = txtPricePerUnit.getText();
+            if(!noofUnits.matches(numberPattern)){
+                JOptionPane.showMessageDialog(null, "No of Units field is invalid");
+            }
+            
+            int totalPrice = Integer.parseInt(noofUnits) * Integer.parseInt(price);
+            txtTotalPrice.setText(String.valueOf(totalPrice));
+        }
+        else{
+            txtTotalPrice.setText("");
+        }
+    }//GEN-LAST:event_txtNoofUnitsKeyReleased
+
+    private void btnAddToCartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddToCartActionPerformed
+        // TODO add your handling code here:
+        String noofUnits = txtNoofUnits.getText();
+        String uniqueId = txtUniqueId.getText();
+        
+        if(!noofUnits.equals("") && !uniqueId.equals("")){
+            String name = txtName.getText();
+            String companyName = txtCompanyName.getText();
+            String pricePerUnit = txtPricePerUnit.getText();
+            String totalPrice = txtTotalPrice.getText();
+            int checkStock = 0;
+            int checkMedicineAlreadyExistInCart = 0;
+
+            
+            try{
+                Connection con = ConnectionProvider.getCon();
+                PreparedStatement ps = con.prepareStatement("SELECT * FROM Medicine WHERE pharmacist_username = ? AND uniqueId = "+uniqueId+";");
+                ps.setString(1,username);
+                ResultSet rs = ps.executeQuery();
+
+               
+                while(rs.next()){
+                    if(rs.getInt("quantity") >= Integer.parseInt(noofUnits)){
+                        checkStock = 1;
+                    }
+                    else{
+                        JOptionPane.showMessageDialog(null,"Medicine is out of stock. Only "+rs.getInt("quantity")+" Left.");
+                    }
+                } 
+            }
+            catch(Exception e){
+                JOptionPane.showMessageDialog(null, e);
+            }
+            
+            if(checkStock == 1){
+                DefaultTableModel dtm = (DefaultTableModel) cartTable.getModel();
+                if(cartTable.getRowCount() != 0){
+                    for(int i = 0; i<cartTable.getRowCount(); i++){
+                        if(Integer.parseInt(dtm.getValueAt(i,0).toString()) == Integer.parseInt(uniqueId)){
+                            checkMedicineAlreadyExistInCart = 1;
+                            JOptionPane.showMessageDialog(null,"Medicine already exist in cart.");
+                        }
+                    }
+                }
+                if(checkMedicineAlreadyExistInCart == 0){
+                    dtm.addRow(new Object[]{ uniqueId, name, companyName, pricePerUnit, noofUnits, totalPrice });
+                    finalTotalPrice  = finalTotalPrice + Integer.parseInt(totalPrice);
+                    lblFinalTotalPrice.setText(String.valueOf(finalTotalPrice));
+                    JOptionPane.showMessageDialog(null, "Added Successfully!");                  
+                }
+                clearMedicineFields();
+            }
+                   
+        }else{
+            JOptionPane.showMessageDialog(null, "No of Units and Medicine Id field is required.");
+        }
+    }//GEN-LAST:event_btnAddToCartActionPerformed
+
+    private void btnAddToCartMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAddToCartMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnAddToCartMouseClicked
+
+    private void cartTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cartTableMouseClicked
+        // TODO add your handling code here:
+        int index = cartTable.getSelectedRow();
+        int a = JOptionPane.showConfirmDialog(null,"Do You want to remove this Medicine","Select",JOptionPane.YES_NO_OPTION);
+        if(a == 0){
+            TableModel model = cartTable.getModel();
+            String total = model.getValueAt(index,5).toString();
+            finalTotalPrice = finalTotalPrice - Integer.parseInt(total);
+            lblFinalTotalPrice.setText(String.valueOf(finalTotalPrice));
+            ((DefaultTableModel) cartTable.getModel()).removeRow(index);
+        }
+    }//GEN-LAST:event_cartTableMouseClicked
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        if(finalTotalPrice != 0){
+            billId = getUniqueId("Bill-");
+            
+            DefaultTableModel dtm = (DefaultTableModel) cartTable.getModel();
+            if(cartTable.getRowCount() != 0){
+                for(int i = 0; i<cartTable.getRowCount(); i++){
+                    try{
+                        Connection con = ConnectionProvider.getCon();
+                        PreparedStatement ps = con.prepareStatement("Update Medicine set quantity = quantity-"+Integer.valueOf(dtm.getValueAt(i, 4).toString())+" WHERE pharmacist_username = ? AND uniqueId = "+Integer.valueOf(dtm.getValueAt(i,0).toString())+" ;");
+                        ps.setString(1,username);
+                        ps.executeUpdate(); 
+                    }
+                    catch(Exception e){
+                        JOptionPane.showMessageDialog(null, e);
+                    }
+                }
+            }
+            
+            try{
+                SimpleDateFormat myFormat = new SimpleDateFormat("dd-MM-yyyy");
+                Calendar cal = Calendar.getInstance();
+                Connection con = ConnectionProvider.getCon();
+                PreparedStatement ps = con.prepareStatement("insert into bill(billId,billDate,totalPaid,generatedBy) values(?,?,?,?);");
+                ps.setString(1, billId);
+                ps.setString(2, myFormat.format(cal.getTime()));
+                ps.setInt(3, finalTotalPrice);
+                ps.setString(4, username);
+                ps.executeUpdate();
+                
+            }
+            catch(Exception e){
+                JOptionPane.showMessageDialog(null, e);
+            }
+            
+            // Create Bill
+            com.itextpdf.text.Document doc = new com.itextpdf.text.Document();
+            try{
+                PdfWriter.getInstance(doc,new FileOutputStream(PharmacyUtils.billPath+""+billId+".pdf"));
+                doc.open();
+                Paragraph pharmacyName = new Paragraph("                                                    Pharmacy Managemant System\n");
+                doc.add(pharmacyName);
+                Paragraph starLine = new Paragraph("-------------------------------------------------------------------------------------------------------------------------------\n");
+                doc.add(starLine);
+                Paragraph detail = new Paragraph("\tBill ID: "+billId+"\nDate: "+ new Date() +"\n Total Paid: "+ finalTotalPrice);
+                doc.add(detail);
+                doc.add(starLine);
+                
+                PdfPTable tb1 = new PdfPTable(6);
+                tb1.addCell("Medicine ID");
+                tb1.addCell("Name");
+                tb1.addCell("Company Name");
+                tb1.addCell("Price Per Unit");
+                tb1.addCell("No of Units");
+                tb1.addCell("Sub Total Price");
+                
+                for(int i = 0 ;i<cartTable.getRowCount(); i++){
+                    String a = cartTable.getValueAt(i,0 ).toString();
+                    String b = cartTable.getValueAt(i,1 ).toString();
+                    String c = cartTable.getValueAt(i,2 ).toString();
+                    String d = cartTable.getValueAt(i,3).toString();
+                    String e = cartTable.getValueAt(i,4 ).toString();
+                    String f = cartTable.getValueAt(i,5 ).toString();
+                    
+                    tb1.addCell(a);
+                    tb1.addCell(b);
+                    tb1.addCell(c);
+                    tb1.addCell(d);
+                    tb1.addCell(e);
+                    tb1.addCell(f);
+                    
+                }
+                
+                doc.add(tb1);
+                doc.add(starLine);
+                Paragraph thank = new Paragraph("                                                   Thankyou, Please Visit Again!");
+                doc.add(thank);
+                //Open pdf
+                OpenPdf.openBy(String.valueOf(billId));
+                
+            }
+            catch(Exception e){
+                JOptionPane.showMessageDialog(null,e);
+            }
+            doc.close();
+            
+            setVisible(false);
+            new SellMedicine(username).setVisible(true);
+        }
+        else{
+            JOptionPane.showMessageDialog(null, "Please add some Medicine to cart");
+        }
+    }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -327,11 +549,11 @@ public class SellMedicine extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAddToCart;
+    private javax.swing.JTable cartTable;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -342,7 +564,7 @@ public class SellMedicine extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable2;
+    private javax.swing.JLabel lblFinalTotalPrice;
     private javax.swing.JTable medicineTable;
     private javax.swing.JTextField txtCompanyName;
     private javax.swing.JTextField txtName;
