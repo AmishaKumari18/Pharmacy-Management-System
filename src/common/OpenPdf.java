@@ -12,20 +12,16 @@ import dao.PharmacyUtils;
  * @author 91727
  */
 public class OpenPdf {
-    public static void openBy(String id){
-        try{
-            if((new File(PharmacyUtils.billPath+id+".pdf")).exists()){
-                Process p;
-                p = Runtime
-                        .getRuntime()
-                        .exec("rundll32 url.dll,FileProtocolHandler "+ PharmacyUtils.billPath+" "+id+".pdf" );
+    public static void openBy(String id) {
+        try {
+            String filePath = PharmacyUtils.billPath + id + ".pdf";
+            if (new File(filePath).exists()) {
+                Process p = Runtime.getRuntime().exec("cmd /c start " + filePath);
+            } else {
+                JOptionPane.showMessageDialog(null, "File does not exist");
             }
-            else{
-                    JOptionPane.showMessageDialog(null, "File does not exist");
-            }
-        }
-        catch(Exception e){
-            JOptionPane.showMessageDialog(null,e);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
         }
     }
 }
