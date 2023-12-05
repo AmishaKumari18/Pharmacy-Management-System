@@ -463,7 +463,7 @@ public class SellMedicine extends javax.swing.JFrame {
                 doc.add(pharmacyName);
                 Paragraph starLine = new Paragraph("-------------------------------------------------------------------------------------------------------------------------------\n");
                 doc.add(starLine);
-                Paragraph detail = new Paragraph("\tBill ID: "+billId+"\nDate: "+ new Date() +"\n Total Paid: "+ finalTotalPrice);
+                Paragraph detail = new Paragraph("\tBill ID: "+billId+"\nDate: "+ new Date() +"\n Total Paid: "+ finalTotalPrice + "\n Seller: "+ username);
                 doc.add(detail);
                 doc.add(starLine);
                 
