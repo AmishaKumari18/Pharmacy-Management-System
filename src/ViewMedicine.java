@@ -103,7 +103,7 @@ public class ViewMedicine extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
         try{
             Connection con = ConnectionProvider.getCon();
-            PreparedStatement st = con.prepareStatement("SELECT * FROM Medicine WHERE pharmacist_username = ?");
+            PreparedStatement st = con.prepareStatement("SELECT * FROM Medicine WHERE pharmacist_username = ?;");
             st.setString(1, username); // Setting the parameter
             ResultSet rs = st.executeQuery();
             
