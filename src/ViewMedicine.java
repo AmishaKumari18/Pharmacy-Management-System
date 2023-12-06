@@ -131,7 +131,7 @@ public class ViewMedicine extends javax.swing.JFrame {
                 ps.executeUpdate();
                 JOptionPane.showMessageDialog(null,"Medicine Deleted Successfully.");
                 setVisible(false);
-                new ViewMedicine().setVisible(true);
+                new ViewMedicine(username).setVisible(true);
             }
             catch(Exception e){
                 JOptionPane.showMessageDialog(null, e);
