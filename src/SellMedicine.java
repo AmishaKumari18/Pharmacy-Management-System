@@ -67,6 +67,28 @@ public class SellMedicine extends javax.swing.JFrame {
         }
     }
     
+    private void alertLowQuantityMedicines() {
+        DefaultTableModel alertTableModel = (DefaultTableModel) jTable2.getModel();
+        alertTableModel.setRowCount(0); // Clear existing rows
+
+        try {
+            Connection con = ConnectionProvider.getCon();
+            String query = "SELECT * FROM medicine WHERE pharmacist_username = ? AND quantity < ?";
+            PreparedStatement st = con.prepareStatement(query);
+
+            st.setString(1, username);
+            st.setInt(2,50);
+
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                alertTableModel.addRow(new Object[]{rs.getString("uniqueId"), rs.getString("quantity")});
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }
+    
     private void clearMedicineFields(){
         txtUniqueId.setText("");
         txtName.setText("");
@@ -88,6 +110,8 @@ public class SellMedicine extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
@@ -112,6 +136,22 @@ public class SellMedicine extends javax.swing.JFrame {
         jLabel9 = new javax.swing.JLabel();
         lblFinalTotalPrice = new javax.swing.JLabel();
         jButton3 = new javax.swing.JButton();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
+        jLabel10 = new javax.swing.JLabel();
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane3.setViewportView(jTable1);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
@@ -168,7 +208,7 @@ public class SellMedicine extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(medicineTable);
 
-        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(77, 189, 300, 505));
+        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 190, 300, 300));
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel3.setText("Medicine ID");
@@ -265,6 +305,23 @@ public class SellMedicine extends javax.swing.JFrame {
         });
         getContentPane().add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(1068, 608, -1, -1));
 
+        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Medicine ID", "Quantity"
+            }
+        ));
+        jScrollPane4.setViewportView(jTable2);
+
+        getContentPane().add(jScrollPane4, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 530, 300, 150));
+
+        jLabel10.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel10.setForeground(new java.awt.Color(255, 0, 0));
+        jLabel10.setText("Alert: ");
+        getContentPane().add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 510, -1, -1));
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -280,6 +337,7 @@ public class SellMedicine extends javax.swing.JFrame {
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
         medicineName("");
+        alertLowQuantityMedicines();
         txtUniqueId.setEditable(false);
         txtName.setEditable(false);
         txtCompanyName.setEditable(false);
@@ -303,7 +361,7 @@ public class SellMedicine extends javax.swing.JFrame {
         
         try{
             Connection con = ConnectionProvider.getCon();
-            String query = "SELECT * FROM medicine WHERE pharmacist_username = ? AND uniqueId = ?";
+            String query = "SELECT * FROM medicine WHERE pharmacist_username = ? AND uniqueId = ?;";
             PreparedStatement st = con.prepareStatement(query);
 
            
@@ -369,7 +427,7 @@ public class SellMedicine extends javax.swing.JFrame {
                         checkStock = 1;
                     }
                     else{
-                        JOptionPane.showMessageDialog(null,"Medicine is out of stock. Only "+rs.getInt("quantity")+" Left.");
+                        JOptionPane.showMessageDialog(null,"Medicine is out of stock. Only "+rs.getInt("quantity")+" Left.;");
                     }
                 } 
             }
@@ -420,44 +478,51 @@ public class SellMedicine extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        if(finalTotalPrice != 0){
+    Connection con = null;
+    try {
+        con = ConnectionProvider.getCon();
+        con.setAutoCommit(false); // Start the transaction
+
+        if (finalTotalPrice != 0) {
             billId = getUniqueId("Bill-");
-            
+
             DefaultTableModel dtm = (DefaultTableModel) cartTable.getModel();
-            if(cartTable.getRowCount() != 0){
-                for(int i = 0; i<cartTable.getRowCount(); i++){
-                    try{
-                        Connection con = ConnectionProvider.getCon();
-                        PreparedStatement ps = con.prepareStatement("Update Medicine set quantity = quantity-"+Integer.valueOf(dtm.getValueAt(i, 4).toString())+" WHERE pharmacist_username = ? AND uniqueId = "+Integer.valueOf(dtm.getValueAt(i,0).toString())+" ;");
-                        ps.setString(1,username);
-                        ps.executeUpdate(); 
-                    }
-                    catch(Exception e){
+            if (cartTable.getRowCount() != 0) {
+                for (int i = 0; i < cartTable.getRowCount(); i++) {
+                    try {
+                        PreparedStatement ps = con.prepareStatement("Update Medicine set quantity = quantity-? WHERE pharmacist_username = ? AND uniqueId = ?");
+                        ps.setInt(1, Integer.valueOf(dtm.getValueAt(i, 4).toString()));
+                        ps.setString(2, username);
+                        ps.setInt(3, Integer.valueOf(dtm.getValueAt(i, 0).toString()));
+                        ps.executeUpdate();
+                    } catch (Exception e) {
+                        con.rollback(); // Rollback the transaction if an exception occurs
                         JOptionPane.showMessageDialog(null, e);
+                        return;
                     }
                 }
             }
-            
-            try{
+
+            try {
                 SimpleDateFormat myFormat = new SimpleDateFormat("dd-MM-yyyy");
                 Calendar cal = Calendar.getInstance();
-                Connection con = ConnectionProvider.getCon();
-                PreparedStatement ps = con.prepareStatement("insert into bill(billId,billDate,totalPaid,generatedBy) values(?,?,?,?);");
+                PreparedStatement ps = con.prepareStatement("insert into bill(billId,billDate,totalPaid,generatedBy) values(?,?,?,?)");
                 ps.setString(1, billId);
                 ps.setString(2, myFormat.format(cal.getTime()));
                 ps.setInt(3, finalTotalPrice);
                 ps.setString(4, username);
                 ps.executeUpdate();
-                
-            }
-            catch(Exception e){
+            } catch (Exception e) {
+                con.rollback(); // Rollback the transaction if an exception occurs
                 JOptionPane.showMessageDialog(null, e);
+                return;
             }
-            
+
             // Create Bill
             com.itextpdf.text.Document doc = new com.itextpdf.text.Document();
-            try{
-                PdfWriter.getInstance(doc,new FileOutputStream(PharmacyUtils.billPath+""+billId+".pdf"));
+            try {
+                // ... your existing PDF creation code
+		PdfWriter.getInstance(doc,new FileOutputStream(PharmacyUtils.billPath+""+billId+".pdf"));
                 doc.open();
                 Paragraph pharmacyName = new Paragraph("                                                    Pharmacy Managemant System\n");
                 doc.add(pharmacyName);
@@ -498,19 +563,43 @@ public class SellMedicine extends javax.swing.JFrame {
                 doc.add(thank);
                 //Open pdf
                 OpenPdf.openBy(String.valueOf(billId));
-                
-            }
-            catch(Exception e){
-                JOptionPane.showMessageDialog(null,e);
+		
+            } catch (Exception e) {
+                con.rollback(); // Rollback the transaction if an exception occurs
+                JOptionPane.showMessageDialog(null, e);
+                return;
             }
             doc.close();
-            
-            setVisible(false);
-            new SellMedicine(username).setVisible(true);
-        }
-        else{
+
+            con.commit(); // Commit the transaction
+
+            // ... your existing code
+	    setVisible(false);
+            new SellMedicine(username).setVisible(true);	
+
+        } else {
             JOptionPane.showMessageDialog(null, "Please add some Medicine to cart");
         }
+    } catch (Exception e) {
+        try {
+            if (con != null) {
+                con.rollback(); // Rollback the transaction if an exception occurs
+            }
+        } catch (Exception rollbackException) {
+            JOptionPane.showMessageDialog(null, "Something Went Wrong!");
+        }
+        JOptionPane.showMessageDialog(null, e);
+    } finally {
+        try {
+            if (con != null) {
+                con.setAutoCommit(true); // Set AutoCommit back to true
+                con.close();
+            }
+        } catch (Exception closeException) {
+            // Handle closing exception
+	    JOptionPane.showMessageDialog(null, "Something Went Wrong!");	
+        }
+    }
     }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
@@ -554,6 +643,7 @@ public class SellMedicine extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -564,6 +654,10 @@ public class SellMedicine extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTable2;
     private javax.swing.JLabel lblFinalTotalPrice;
     private javax.swing.JTable medicineTable;
     private javax.swing.JTextField txtCompanyName;
