@@ -101,7 +101,7 @@ public class ViewBill extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
         try{
             Connection con = ConnectionProvider.getCon();
-            String query = "SELECT * FROM bill WHERE generatedBy = ?";
+            String query = "SELECT * FROM bill WHERE generatedBy = ?;";
             PreparedStatement ps = con.prepareStatement(query);
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
