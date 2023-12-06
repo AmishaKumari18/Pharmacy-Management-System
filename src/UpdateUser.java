@@ -167,7 +167,7 @@ public class UpdateUser extends javax.swing.JFrame {
             try{
                 Connection con = ConnectionProvider.getCon();
                 Statement st = con.createStatement();
-                ResultSet rs = st.executeQuery("select * from appuser where username='"+username+"'");
+                ResultSet rs = st.executeQuery("select * from appuser where username='"+username+"';");
                 while(rs.next()){
                     txtUsername.setEditable(false);
                     checkUserExist = 1;
@@ -254,7 +254,7 @@ public class UpdateUser extends javax.swing.JFrame {
         else{
             try{
                 Connection con = ConnectionProvider.getCon();
-                PreparedStatement ps = con.prepareStatement("update appuser set userRole = ?, name = ?, dob = ?, mobileNumber = ?, email = ?, address = ? where username = ?");
+                PreparedStatement ps = con.prepareStatement("update appuser set userRole = ?, name = ?, dob = ?, mobileNumber = ?, email = ?, address = ? where username = ?;");
                 ps.setString(1, userRole);
                 ps.setString(2, name);
                 ps.setString(3, dob);
@@ -301,7 +301,7 @@ public class UpdateUser extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(UpdateUser.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-
+         
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
