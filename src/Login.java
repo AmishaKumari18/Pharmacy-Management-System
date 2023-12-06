@@ -4,6 +4,8 @@
  */
 
 import dao.ConnectionProvider;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import javax.swing.JOptionPane;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -115,36 +117,54 @@ public class Login extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtUsernameActionPerformed
 
+    private String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(password.getBytes());
+
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedBytes) {
+                sb.append(String.format("%02x", b));
+            }
+
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error hashing password.", e);
+        }
+    }
+    
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         String username = txtUsername.getText();
         String password = txtPassword.getText();
-        
-        int temp = 0;
-        
-        try{
+
+        try {
             Connection con = ConnectionProvider.getCon();
             Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery("select *from appuser where username = '"+username+"' and password = '"+password+"'");
-            while(rs.next()){
-                
-                temp = 1;
-                if(rs.getString("userRole").equals("Admin")){
-                    setVisible(false);
-                    new AdminDashboard(username).setVisible(true);
+            ResultSet rs = st.executeQuery("SELECT * FROM appuser WHERE username = '" + username + "'");
+
+            if (rs.next()) {
+                String storedHashedPassword = rs.getString("password");
+
+                // Hash the provided password and compare with stored hashed password
+                String providedHashedPassword = hashPassword(password);
+
+                if (storedHashedPassword.equals(providedHashedPassword)) {
+                    if (rs.getString("userRole").equals("Admin")) {
+                        setVisible(false);
+                        new AdminDashboard(username).setVisible(true);
+                    } else {
+                        setVisible(false);
+                        new PharmacistDashboard(username).setVisible(true);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Incorrect Username or Password");
                 }
-                else{
-                    setVisible(false);
-                    new PharmacistDashboard(username).setVisible(true);
-                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Incorrect Username or Password");
             }
-            
-            if(temp == 0 ){
-                JOptionPane.showMessageDialog(null,"Incorrect Username or Password");
-            }
-        }
-        catch(Exception e){
-            JOptionPane.showMessageDialog(null,e);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
         }
                 
     }//GEN-LAST:event_jButton1ActionPerformed
