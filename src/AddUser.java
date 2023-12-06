@@ -12,6 +12,8 @@ import javax.swing.JOptionPane;
 import dao.ConnectionProvider;
 import java.text.*;
 import java.util.Date;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 /**
  *
  * @author 91727
@@ -283,7 +285,23 @@ public class AddUser extends javax.swing.JFrame {
         // TODO add your handling code here:
         setVisible(false);
     }//GEN-LAST:event_jButton2ActionPerformed
-
+    
+    private String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(password.getBytes());
+            
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error hashing password.", e);
+        }
+    }
+    
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
         String userRole = (String) ComboUserRole.getSelectedItem();
@@ -324,32 +342,35 @@ public class AddUser extends javax.swing.JFrame {
         else if(checkUsername == 1){
             JOptionPane.showMessageDialog(null,"Username already exist");
         }
-        else if(password.equals("")){
-            JOptionPane.showMessageDialog(null,"Password field is required");
-        }
-        else if(address.equals("")){
-            JOptionPane.showMessageDialog(null,"Address field is required");
-        }
-        else{
-            try{
+        else if (password.equals("")) {
+            JOptionPane.showMessageDialog(null, "Password field is required");
+        } else if (address.equals("")) {
+            JOptionPane.showMessageDialog(null, "Address field is required");
+        } else {
+            try {
                 Connection con = ConnectionProvider.getCon();
-                PreparedStatement ps = con.prepareStatement("Insert into appuser (userRole,name,dob,mobileNumber,email,username,password,address) values(?,?,?,?,?,?,?,?)");
+                PreparedStatement ps = con.prepareStatement(
+                        "INSERT INTO appuser (userRole, name, dob, mobileNumber, email, username, password, address) VALUES(?,?,?,?,?,?,?,?)");
+
                 ps.setString(1, userRole);
                 ps.setString(2, name);
                 ps.setString(3, dob);
                 ps.setString(4, mobileNumber);
                 ps.setString(5, email);
                 ps.setString(6, username);
-                ps.setString(7, password);
+                
+                // Hash the password before storing it
+                String hashedPassword = hashPassword(password);
+                ps.setString(7, hashedPassword);
+
                 ps.setString(8, address);
-                
+
                 ps.executeUpdate();
-                
-                JOptionPane.showMessageDialog(null,"User Added Successfully!");
+
+                JOptionPane.showMessageDialog(null, "User Added Successfully!");
                 setVisible(false);
                 new AddUser().setVisible(true);
-            }
-            catch(Exception e){
+            } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, e);
             }
         }
