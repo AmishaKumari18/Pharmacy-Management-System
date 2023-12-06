@@ -211,7 +211,7 @@ public class UpdateMedicine extends javax.swing.JFrame {
         else{
             try{
                 Connection con = ConnectionProvider.getCon();
-                String query = "SELECT * FROM medicine WHERE pharmacist_username = ? AND uniqueId = ?";
+                String query = "SELECT * FROM medicine WHERE pharmacist_username = ? AND uniqueId = ?;";
                 PreparedStatement st = con.prepareStatement(query);
                 st.setString(1, username);
                 st.setString(2, uniqueId);
