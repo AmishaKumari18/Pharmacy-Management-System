@@ -207,7 +207,7 @@ public class AddMedicine extends javax.swing.JFrame {
                 ps.executeUpdate();
                 JOptionPane.showMessageDialog(null, "Medicine Added Successfully!");
                 setVisible(false);
-                new AddMedicine().setVisible(true);
+                new AddMedicine(username).setVisible(true);
                 
             }
             catch(Exception e){
