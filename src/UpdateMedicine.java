@@ -188,7 +188,7 @@ public class UpdateMedicine extends javax.swing.JFrame {
                 ps.executeUpdate();
                 JOptionPane.showMessageDialog(null,"Medicine Updated Successfully");
                 setVisible(false);
-                new UpdateMedicine().setVisible(true);
+                new UpdateMedicine(username).setVisible(true);
             }
             catch(Exception e){
                 JOptionPane.showMessageDialog(null, e);
