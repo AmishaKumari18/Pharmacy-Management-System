@@ -44,7 +44,6 @@ public class ViewUser extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
-        setPreferredSize(new java.awt.Dimension(850, 500));
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
                 formComponentShown(evt);
@@ -69,7 +68,7 @@ public class ViewUser extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "Name", "Role", "DOB", "Mobile Number", "Email", "Username", "Password", "Address"
+                "Name", "Role", "DOB", "Mobile Number", "Email", "Username", "Password", "Address"
             }
         ));
         jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -102,8 +101,7 @@ public class ViewUser extends javax.swing.JFrame {
             ResultSet rs = st.executeQuery("select * from appuser");
             
             while(rs.next()){
-                model.addRow(new Object[]{rs.getString("appuser_pk")
-                        ,rs.getString("name")
+                model.addRow(new Object[]{rs.getString("name")
                         ,rs.getString("userRole")
                         ,rs.getString("dob")
                         ,rs.getString("mobileNumber")
